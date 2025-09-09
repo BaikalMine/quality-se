@@ -1,0 +1,15 @@
+{
+  "name": "quality-se",
+  "version": "0.0.8",
+  "title": "Quality (SE-compatible fork)",
+  "author": "DeadMan (fork), original by Wube Software",
+  "contact": "https://github.com/BaikalMine",
+  "homepage": "https://github.com/BaikalMine/quality-se",
+  "dependencies": [
+    "base >= 2.0.0",
+    "space-exploration >= 0.7.24"
+  ],
+  "quality_required": true,
+  "factorio_version": "2.0",
+  "description": "Fork of Quality adapted for Space Exploration. Original mod by Wube Software. SE tweaks by DeadMan."
+}
