@@ -1,4 +1,12 @@
--- Final fixes: keep SE progression & clamp edge-case energies
+-- data-final-fixes.lua (Quality-SE)
+-- 1) Dennylist категорий SE (сохранить прогрессию)
+-- 2) Кламп слишком малого energy_required у всех рециклингов
+-- 3) Fix: core fragments → self-recycle (с корректным 'type')
+-- 4) Финальный санитайзер: проверяет ТОЛЬКО quality-категории и НИКОГДА не трогает 'se-*'
+
+----------------------------------------
+-- 1) SE progression protection + clamp
+----------------------------------------
 if mods["space-exploration"] then
   local deny = {
     "arcosphere",
@@ -27,7 +35,7 @@ if mods["space-exploration"] then
     return false
   end
 
-  -- Disable quality only on denylisted categories
+  -- Отключить качество только на опасных категориях
   for _, r in pairs(data.raw.recipe) do
     local cat = r.category or "crafting"
     if in_deny(cat) then
@@ -37,7 +45,7 @@ if mods["space-exploration"] then
     end
   end
 
-  -- Clamp tiny energy for recycling-ish recipes to avoid engine error <= 0.001
+  -- Кламп микротайминга у любых видов рециклинга (SE и Quality)
   local function clamp_energy(recipe)
     if not recipe then return end
     local er = recipe.energy_required
@@ -46,8 +54,7 @@ if mods["space-exploration"] then
   for _, r in pairs(data.raw.recipe) do
     local cat = r.category
     if (cat == "hard-recycling") or (cat == "hand-hard-recycling") or
-       (cat == "recycling") or (cat == "recycling-or-hand-crafting") or
-       (type(r.name)=="string" and string.find(r.name, "recycling", 1, true)) then
+       (cat == "recycling") or (cat == "recycling-or-hand-crafting") then
       clamp_energy(r)
       if r.normal then clamp_energy(r.normal) end
       if r.expensive then clamp_energy(r.expensive) end
@@ -55,71 +62,15 @@ if mods["space-exploration"] then
   end
 end
 
--- Sanitizer (final stage): remove recycling recipes that reference items removed by other mods (SE, K2, etc.)
-do
-  local item_types = {
-    "item", "module", "tool", "armor", "gun", "ammo", "capsule",
-    "item-with-entity-data", "item-with-label", "item-with-tags",
-    "selection-tool", "blueprint", "deconstruction-planner", "upgrade-planner",
-    "item-with-inventory", "rail-planner", "spidertron-remote",
-    "repair-tool", "mining-tool", "armor", "fluid"
-  }
-  local function item_exists(name)
-    if not name then return false end
-    for _, t in pairs(item_types) do
-      if data.raw[t] and data.raw[t][name] then return true end
-    end
-    return false
-  end
-  local function ingredient_or_result_missing(proto_list, main_name, result_name)
-    if proto_list then
-      for _, pr in pairs(proto_list) do
-        if type(pr) == "table" then
-          local n = pr.name or pr[1]
-          if n and not item_exists(n) then return true end
-        end
-      end
-      return false
-    else
-      local n = main_name or result_name
-      if n and not item_exists(n) then return true end
-      return false
-    end
-  end
-
-  local removed = 0
-  for name, r in pairs(data.raw.recipe) do
-    local cat = r.category
-    local is_recycle = (name and string.find(name, "recycling", 1, true)) or
-                       (cat == "recycling") or (cat == "recycling-or-hand-crafting") or
-                       (cat == "hard-recycling") or (cat == "hand-hard-recycling")
-    if is_recycle then
-      local miss = ingredient_or_result_missing(r.ingredients, r.main_product, r.result)
-                or ingredient_or_result_missing(r.results)
-      if not miss and r.normal then
-        miss = ingredient_or_result_missing(r.normal.ingredients, r.normal.main_product, r.normal.result)
-            or ingredient_or_result_missing(r.normal.results)
-      end
-      if not miss and r.expensive then
-        miss = ingredient_or_result_missing(r.expensive.ingredients, r.expensive.main_product, r.expensive.result)
-            or ingredient_or_result_missing(r.expensive.results)
-      end
-      if miss then
-        data.raw.recipe[name] = nil
-        removed = removed + 1
-      end
-    end
-  end
-  log("quality-se final sanitizer removed "..removed.." invalid recycling recipes")
-end
-
--- Fixup: forbid SE core fragments as recycling targets; fallback to self-recycle with chance
+-----------------------------------------------------------
+-- 3) Core fragments fix → self-recycle with probability
+-----------------------------------------------------------
 if mods["space-exploration"] then
   local function has_core_fragment_result(recipe)
     local function any_frag(list)
       if not list then return false end
-      for _, r in pairs(list) do
-        local n = (type(r)=="table") and (r.name or r[1]) or nil
+      for _, rr in pairs(list) do
+        local n = (type(rr)=="table") and (rr.name or rr[1]) or nil
         if n and string.find(n, "^se%-core%-fragment") then
           return true
         end
@@ -129,9 +80,7 @@ if mods["space-exploration"] then
     return any_frag(recipe.results)
   end
 
-  -- Correct self-recycle writer (with required 'type' field for Factorio 2.0)
   local function rewrite_to_self_recycle(r, prob)
-    -- determine input item/fluid name
     local function get_name(list)
       if not list then return nil end
       for _, ing in pairs(list) do
@@ -162,13 +111,12 @@ if mods["space-exploration"] then
     end
   end
 
-  local SELF_RECYCLE_PROB = 0.5  -- можно настроить (0.35–0.6)
-
+  local SELF_RECYCLE_PROB = 0.5
   for _, r in pairs(data.raw.recipe) do
+    local cat = r.category
     local is_recycling_cat =
-      (r.category == "recycling") or (r.category == "recycling-or-hand-crafting") or
-      (r.category == "hard-recycling") or (r.category == "hand-hard-recycling") or
-      (type(r.name)=="string" and string.find(r.name, "recycling", 1, true))
+      (cat == "recycling") or (cat == "recycling-or-hand-crafting") or
+      (cat == "hard-recycling") or (cat == "hand-hard-recycling")
 
     if is_recycling_cat then
       local got_frag = has_core_fragment_result(r)
@@ -179,4 +127,97 @@ if mods["space-exploration"] then
       end
     end
   end
+end
+
+-----------------------------------------
+-- 4) Final sanitizer (quality-only, never 'se-*')
+-----------------------------------------
+do
+  local function is_quality_category(r)
+    if not r then return false end
+    local c = r.category
+    return (c == "recycling") or (c == "recycling-or-hand-crafting") or
+           (r.normal and (r.normal.category == "recycling" or r.normal.category == "recycling-or-hand-crafting")) or
+           (r.expensive and (r.expensive.category == "recycling" or r.expensive.category == "recycling-or-hand-crafting"))
+  end
+
+  local item_types = {
+    "item", "module", "tool", "armor", "gun", "ammo", "capsule",
+    "item-with-entity-data", "item-with-label", "item-with-tags",
+    "selection-tool", "blueprint", "deconstruction-planner", "upgrade-planner",
+    "item-with-inventory", "rail-planner", "spidertron-remote",
+    "repair-tool", "mining-tool", "armor", "fluid"
+  }
+  local function item_exists(name)
+    if not name then return false end
+    for _, t in pairs(item_types) do
+      if data.raw[t] and data.raw[t][name] then return true end
+    end
+    return false
+  end
+  local function missing(proto_list, main_name, result_name)
+    if proto_list then
+      for _, pr in pairs(proto_list) do
+        if type(pr) == "table" then
+          local n = pr.name or pr[1]
+          if n and not item_exists(n) then return true end
+        end
+      end
+      return false
+    else
+      local n = main_name or result_name
+      if n and not item_exists(n) then return true end
+      return false
+    end
+  end
+
+  local removed = 0
+  for name, r in pairs(data.raw.recipe) do
+    -- работаем ТОЛЬКО с quality-категориями
+    if is_quality_category(r) then
+      -- и НИКОГДА не трогаем рецепты с именем 'se-*'
+      if not (type(name)=="string" and string.find(name, "^se%-")) then
+        local miss = missing(r.ingredients, r.main_product, r.result) or missing(r.results)
+        if not miss and r.normal then
+          miss = missing(r.normal.ingredients, r.normal.main_product, r.normal.result) or missing(r.normal.results)
+        end
+        if not miss and r.expensive then
+          miss = missing(r.expensive.ingredients, r.expensive.main_product, r.expensive.result) or missing(r.expensive.results)
+        end
+        if miss then
+          data.raw.recipe[name] = nil
+          removed = removed + 1
+        end
+      end
+    end
+  end
+  log("quality-se final sanitizer (quality-only) removed "..removed.." invalid quality recycling recipes")
+end
+
+-- Always allow "quality" on SE space machines
+if mods["space-exploration"] then
+  local function add_effect(entity_type, name, effect)
+    local proto = data.raw[entity_type] and data.raw[entity_type][name]
+    if not proto then return end
+
+    local effs = proto.allowed_effects
+    if not effs then
+      effs = {}
+      proto.allowed_effects = effs
+    end
+
+    for _, e in pairs(effs) do
+      if e == effect then return end
+    end
+    table.insert(effs, effect)
+  end
+
+  local prefix = "se-"
+  local gr = "-grounded"
+
+  add_effect("assembling-machine", prefix .. "space-assembling-machine", "quality")
+  add_effect("assembling-machine", prefix .. "space-manufactory",       "quality")
+
+  add_effect("assembling-machine", prefix .. "space-assembling-machine" .. gr, "quality")
+  add_effect("assembling-machine", prefix .. "space-manufactory"       .. gr, "quality")
 end
