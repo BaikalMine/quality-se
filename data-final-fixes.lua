@@ -217,7 +217,63 @@ if mods["space-exploration"] then
 
   add_effect("assembling-machine", prefix .. "space-assembling-machine", "quality")
   add_effect("assembling-machine", prefix .. "space-manufactory",       "quality")
-
+  add_effect("assembling-machine", prefix .. "space-telescope-microwave", "quality")
+  add_effect("assembling-machine", prefix .. "space-telescope-radio",       "quality")
+  add_effect("assembling-machine", prefix .. "space-telescope-xray", "quality")
+  add_effect("assembling-machine", prefix .. "space-telescope-gammaray",       "quality")
+  add_effect("assembling-machine", prefix .. "space-telescope", "quality")
+  add_effect("assembling-machine", prefix .. "pulveriser",       "quality")
+  add_effect("assembling-machine", prefix .. "pulveriser" .. gr, "quality")
+  add_effect("assembling-machine", prefix .. "space-mechanical-laboratory", "quality")
+  add_effect("assembling-machine", prefix .. "recycling-facility",       "quality")
+  add_effect("assembling-machine", prefix .. "recycling-facility" .. gr, "quality")
+  add_effect("assembling-machine", prefix .. "space-thermodynamics-laboratory", "quality")
+  add_effect("assembling-machine", prefix .. "space-thermodynamics-laboratory" .. gr, "quality")
+  add_effect("assembling-machine", prefix .. "space-radiation-laboratory",       "quality")
+  add_effect("assembling-machine", prefix .. "space-laser-laboratory", "quality")
+  add_effect("assembling-machine", prefix .. "fuel-refinery",       "quality")
+  add_effect("assembling-machine", prefix .. "fuel-refinery" .. gr, "quality") 
+  add_effect("assembling-machine", prefix .. "space-electromagnetics-laboratory",       "quality")
+  add_effect("assembling-machine", prefix .. "space-plasma-generator", "quality")
+  add_effect("assembling-machine", prefix .. "space-biochemical-laboratory",       "quality")
+  add_effect("assembling-machine", prefix .. "space-growth-facility",       "quality")
+  add_effect("assembling-machine", prefix .. "space-material-fabricator", "quality")
+  add_effect("assembling-machine", prefix .. "space-particle-collider",       "quality")
+  add_effect("assembling-machine", prefix .. "space-genetics-laboratory",       "quality")
+  add_effect("assembling-machine", prefix .. "space-spectrometry-facility",       "quality") 
+  add_effect("assembling-machine", prefix .. "lifesupport-facility",       "quality") 
+  add_effect("assembling-machine", prefix .. "lifesupport-facility" .. gr, "quality") 
+  add_effect("assembling-machine", prefix .. "space-decontamination-facility",       "quality")  
+  add_effect("assembling-machine", prefix .. "space-supercomputer-1",       "quality")  
+  add_effect("assembling-machine", prefix .. "space-supercomputer-2",       "quality")    
+  add_effect("assembling-machine", prefix .. "space-supercomputer-3",       "quality")    
+  add_effect("assembling-machine", prefix .. "space-supercomputer-4",       "quality")   
   add_effect("assembling-machine", prefix .. "space-assembling-machine" .. gr, "quality")
   add_effect("assembling-machine", prefix .. "space-manufactory"       .. gr, "quality")
+  
+--"space-telescope-microwave"
+--"space-telescope-radio"
+--"space-telescope-xray"
+--"space-telescope-gammaray"
+--"space-telescope"
+--"space-manufactory"
+--"pulveriser"
+--"space-mechanical-laboratory"
+--"recycling-facility"
+--"space-thermodynamics-laboratory"
+ --"space-radiation-laboratory"
+--"space-laser-laboratory"
+--"fuel-refinery"
+--"space-electromagnetics-laboratory"
+--"space-plasma-generator"
+--"space-biochemical-laboratory"
+--"space-growth-facility"
+--"space-material-fabricator"
+--"space-particle-collider"
+--"space-genetics-laboratory"
+
+--space-supercomputer-1  space-supercomputer-2 space-supercomputer-3 space-supercomputer-4
+--space-spectrometry-facility
+--lifesupport-facility
+--space-decontamination-facility
 end
