@@ -9,5 +9,3 @@ require("prototypes.tips-and-tricks")
 require("prototypes.entity.entity")
 require("prototypes.entity.remnants")
 require("prototypes.entity.explosions")
-
-se_quality_mod_detected = true

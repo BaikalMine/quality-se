@@ -7,7 +7,7 @@
   "homepage": "https://github.com/BaikalMine/quality-se",
   "dependencies": [
     "base >= 2.0.0",
-    "? space-exploration >= 0.7.25",
+    "? space-exploration >= 0.7.35",
     
     "! space-age",
     "! quality"

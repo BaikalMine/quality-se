@@ -52,9 +52,5 @@ end
 
 -- 4) Мини-бридж для SE: только разрешаем ресайклер Quality в космосе
 if mods["space-exploration"] then
-  if data.raw["furnace"] and data.raw["furnace"]["recycler"] then
-    data.raw["furnace"]["recycler"].se_allow_in_space = true
-  end
+  data.raw.technology["recycling"].enabled = true
 end
-
-
