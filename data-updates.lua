@@ -49,8 +49,3 @@ end
 if data.raw.quality and data.raw.quality.normal then
   data.raw.quality.normal.hidden = false
 end
-
--- 4) Мини-бридж для SE: только разрешаем ресайклер Quality в космосе
-if mods["space-exploration"] then
-  data.raw.technology["recycling"].enabled = true
-end
