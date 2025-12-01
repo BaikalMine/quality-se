@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.7
+Date: 01.12.2025
+  Changes:
+    - Made `quality-se` register itself as the SE quality mod and added the missing compatibility hooks from the reference mod (tech descriptions, tooltips, arcosphere protection).
+    - Applied Krastorio 2 tweaks (recipes, recycler ingredients, tech cost, auto-recycle blacklist) and honoured the `ic-more-qualities` expansion tech.
+    - Added `quality-se-allow-se-beacon-quality` startup switch so the SE compact/wide beacons can gain quality (disabled by default) and documented the setting.
 Version: 0.1.6
 Date: 27.10.2025
   Changes:

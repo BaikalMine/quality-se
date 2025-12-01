@@ -1,4 +1,6 @@
-data:extend(
+local quality_exists = data.raw.quality and data.raw.quality.uncommon and data.raw.quality.rare and data.raw.quality.epic and data.raw.quality.legendary
+if not quality_exists then
+  data:extend(
   {
     {
       type = "quality",
@@ -55,4 +57,5 @@ data:extend(
       science_pack_drain_multiplier = 95/100,
     }
   }
-)
+  )
+end

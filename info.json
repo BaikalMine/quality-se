@@ -1,6 +1,6 @@
 {
   "name": "quality-se",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "title": "Quality (SE-compatible fork)",
   "author": "DeadMan (fork), original by Wube Software",
   "contact": "https://github.com/BaikalMine",
@@ -14,5 +14,5 @@
   ],
   "quality_required": true,
   "factorio_version": "2.0",
-  "description": "Fork of Quality adapted for Space Exploration. Original mod by Wube Software. SE tweaks by DeadMan."
+  "description": "Quality-SE is a Space Exploration (>=0.7.24) compatible fork of the official Quality mod. Original mod by Wube Software, SE adaptation by DeadMan. Restores the Recycler for all items and modules in SE, drops invalid recipes, preserves SE progression (disables quality on critical tech), clamps recycling energy extremes, and lets the Recycler operate in space. Designed for SE players who need large-volume recycling without breaking balance. Note: K2SE combinations (Space Exploration + Krastorio2) running SE 0.7.37 or later are not supported; Quality-SE still works in SE-only setups.",
 }

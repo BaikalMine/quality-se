@@ -62,6 +62,159 @@ if mods["space-exploration"] then
   end
 end
 
+if mods["space-exploration"] then
+  local ok_data_util, data_util = pcall(require, "data_util")
+  local quality_startup = settings.startup["se-quality-mod-name"]
+  if ok_data_util and data_util and quality_startup and quality_startup.value and quality_startup.value ~= "" then
+
+    local module_setting = settings.startup["se-modules-with-quality-in-module-slots"]
+    local module_tooltip_value
+    local module_setting_value = module_setting and module_setting.value
+    if module_setting_value and module_setting_value ~= "ignore" then
+      module_tooltip_value = {"space-exploration.quality_ones_will_x_themselves_line", module_setting_value}
+    else
+      module_tooltip_value = {"space-exploration.quality_ones_should_not_be_used_line"}
+    end
+
+    for _, module in pairs(data.raw.module or {}) do
+      data_util.add_custom_tooltip_field(module, {
+        key = "quality-ones-will-x-themselves",
+        name = "",
+        value = module_tooltip_value,
+        order = 0,
+      })
+    end
+
+    local loses_quality_mod = data.raw["mod-data"] and data.raw["mod-data"][data_util.mod_prefix .. "loses-quality-when-placed"]
+    if loses_quality_mod and loses_quality_mod.data and loses_quality_mod.data.entities then
+      for _, entity in ipairs(loses_quality_mod.data.entities) do
+        local prototype = data.raw[entity.type] and data.raw[entity.type][entity.name]
+        if prototype then
+          data_util.add_custom_tooltip_field(prototype, {
+            key = "loses-quality-when-placed",
+            name = "",
+            value = {"space-exploration.loses_quality_when_placed_line"},
+            order = 0,
+          })
+        end
+      end
+    end
+
+    local allow_se_beacon_quality = settings.startup["quality-se-allow-se-beacon-quality"]
+    if allow_se_beacon_quality and allow_se_beacon_quality.value then
+      local function append_quality_effect(prototype)
+        if not prototype then return end
+        local effects = prototype.allowed_effects
+        if not effects then
+          prototype.allowed_effects = {"quality"}
+          return
+        end
+        for _, effect in ipairs(effects) do
+          if effect == "quality" then
+            return
+          end
+        end
+        table.insert(effects, "quality")
+      end
+
+      for _, name in ipairs({
+        data_util.mod_prefix .. "compact-beacon",
+        data_util.mod_prefix .. "compact-beacon-2",
+        data_util.mod_prefix .. "wide-beacon",
+        data_util.mod_prefix .. "wide-beacon-2",
+      }) do
+        append_quality_effect(data.raw.beacon and data.raw.beacon[name])
+      end
+    end
+
+    local arcosphere_variants = util.list_to_map({
+      data_util.mod_prefix .. "arcosphere-a",
+      data_util.mod_prefix .. "arcosphere-b",
+      data_util.mod_prefix .. "arcosphere-c",
+      data_util.mod_prefix .. "arcosphere-d",
+      data_util.mod_prefix .. "arcosphere-e",
+      data_util.mod_prefix .. "arcosphere-f",
+      data_util.mod_prefix .. "arcosphere-g",
+      data_util.mod_prefix .. "arcosphere-h",
+    })
+
+    local function has_arcosphere_result(recipe)
+      if not recipe then return false end
+      for _, result in ipairs(recipe.results or {}) do
+        local product = result.name or result[1]
+        if product and arcosphere_variants[product] then
+          return true
+        end
+      end
+      return (type(recipe.result) == "string" and arcosphere_variants[recipe.result]) or false
+    end
+
+    local function forbid_quality(recipe)
+      if not recipe then return end
+      recipe.allow_quality = false
+      if recipe.normal then recipe.normal.allow_quality = false end
+      if recipe.expensive then recipe.expensive.allow_quality = false end
+    end
+
+    for _, recipe in pairs(data.raw.recipe) do
+      if has_arcosphere_result(recipe) then
+        forbid_quality(recipe)
+      end
+      if recipe.normal and has_arcosphere_result(recipe.normal) then
+        forbid_quality(recipe.normal)
+      end
+      if recipe.expensive and has_arcosphere_result(recipe.expensive) then
+        forbid_quality(recipe.expensive)
+      end
+    end
+
+    local undiscoverable_setting = settings.startup["se-quality-technology-is-undiscoverable"]
+    local undiscoverable = undiscoverable_setting and undiscoverable_setting.value
+    if undiscoverable and data.raw["utility-constants"] and data.raw["utility-constants"]["default"] then
+      data.raw["utility-constants"]["default"].factoriopedia_recycling_recipe_categories = {}
+    end
+
+    local tech_names = {
+      "quality-module",
+      "quality-module-2",
+      "quality-module-3",
+      "quality-module-4",
+      "quality-module-5",
+      "quality-module-6",
+      "quality-module-7",
+      "quality-module-8",
+      "quality-module-9",
+      "recycling",
+      "epic-quality",
+      "legendary-quality",
+    }
+
+    if mods["ic-more-qualities"] then
+      table.insert(tech_names, "ic-ultimate-quality")
+    end
+
+    for _, tech_name in ipairs(tech_names) do
+      local technology = data.raw.technology[tech_name]
+      if technology then
+        if undiscoverable then
+          technology.enabled = false
+          technology.visible_when_disabled = true
+        end
+        technology.localised_description = {
+          "",
+          "[font=default-bold][color=#f5cb48]",
+          {undiscoverable and "undiscoverable.disabled-by-se-startup-setting" or "undiscoverable.enabled-by-se-startup-setting"},
+          "\n",
+          {"undiscoverable.quality-disclaimer"},
+          "[/color][/font]",
+          "\n",
+          {"technology-description." .. (tech_name:match("^quality%-module") and "quality-module" or tech_name)}
+        }
+      end
+    end
+  end
+end
+
 -----------------------------------------------------------
 -- 3) Core fragments fix → self-recycle with probability
 -----------------------------------------------------------
